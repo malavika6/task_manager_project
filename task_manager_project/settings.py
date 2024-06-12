@@ -74,16 +74,20 @@ WSGI_APPLICATION = 'task_manager_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'sql_server.pyodbc',
+        'ENGINE': 'mssql',
         'NAME': 'your_database_name',
         'USER': 'your_database_user',
         'PASSWORD': 'your_database_password',
-        'HOST': 'your_database_server',
-        'PORT': 'your_database_port',
+        'HOST': 'your_database_host',
+        'PORT': '1433',
+
         'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
+            'driver': 'ODBC Driver 17 for SQL Server', 
+            'extra_params': 'TrustServerCertificate=yes;', 
+            'conn_timeout': 30,  
         },
     }
 }
