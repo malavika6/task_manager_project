@@ -1,29 +1,32 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView,DeleteView,FormView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.urls import reverse_lazy
+
+
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from .models import Task
 
+
 class CustomLoginview(LoginView):
-    fields ='__all__'
-    template_name='tasks/login.html'
+    fields = '__all__'
+    template_name = 'tasks/login.html'
     redirect_authenticated_user = True
-    
+
     def get_success_url(self):
         return reverse_lazy('tasks')
-    
-    
+
+
 class RegisterPage(FormView):
     template_name = 'tasks/register.html'
     form_class = UserCreationForm
     redirect_authenticated_user = True
     success_url = reverse_lazy('tasks')
-    
+
     def form_valid(self, form):
         user = form.save()
         if user is not None:
@@ -36,10 +39,10 @@ class RegisterPage(FormView):
         return super(RegisterPage, self).get(*args, **kwargs)
 
 
-class TaskList(LoginRequiredMixin,ListView):
+class TaskList(LoginRequiredMixin, ListView):
     model = Task
     context_object_name = 'tasks'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['tasks'] = context['tasks'].filter(user=self.request.user)
@@ -47,12 +50,33 @@ class TaskList(LoginRequiredMixin,ListView):
         return context
 
 
-class TaskDetail(LoginRequiredMixin,DetailView):
+class TaskList(LoginRequiredMixin, ListView):
+    model = Task
+    context_object_name = 'tasks'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        filter_val = self.request.GET.get('filter', '')
+        if filter_val == 'completed':
+            tasks = Task.objects.filter(user=self.request.user, completed=True)
+        elif filter_val == 'incomplete':
+            tasks = Task.objects.filter(
+                user=self.request.user, completed=False)
+        else:
+            tasks = Task.objects.filter(user=self.request.user)
+
+        context['tasks'] = tasks
+        context['count'] = tasks.filter(completed=False).count()
+        context['filter'] = filter_val
+        return context
+
+
+class TaskDetail(LoginRequiredMixin, DetailView):
     model = Task
     context_object_name = 'task'
 
 
-class TaskCreate(LoginRequiredMixin,CreateView):
+class TaskCreate(LoginRequiredMixin, CreateView):
     model = Task
     fields = ['title', 'description', 'completed']
     success_url = reverse_lazy('tasks')
@@ -61,15 +85,14 @@ class TaskCreate(LoginRequiredMixin,CreateView):
         form.instance.user = self.request.user
         return super(TaskCreate, self).form_valid(form)
 
-class TaskUpdate(LoginRequiredMixin,UpdateView):
+
+class TaskUpdate(LoginRequiredMixin, UpdateView):
     model = Task
     fields = ['title', 'description', 'completed']
     success_url = reverse_lazy('tasks')
 
 
-class DeleteView(LoginRequiredMixin,DeleteView):
+class DeleteView(LoginRequiredMixin, DeleteView):
     model = Task
     context_object_name = 'task'
     success_url = reverse_lazy('tasks')
-  
-

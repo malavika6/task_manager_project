@@ -1,3 +1,19 @@
-{% extends 'tasks/main.html' %} {% block content %}
-<h1>Task:{{task}}</h1>
-{% endblock content %}
+{% extends 'tasks/main.html' %}
+
+{% block content %}
+  <div class="header-bar">
+    <h1>{{ task.title }}</h1>
+  </div>
+  <div class="task-detail card-body">
+    <p>
+      <strong>Description:</strong> {{ task.description }}
+    </p>
+    <p>
+      <strong>Completed:</strong> {{ task.completed|yesno:'Yes,No' }}
+    </p>
+    <p>
+      <strong>Created at:</strong> {{ task.created_at }}
+    </p>
+    <a class="button" href="{% url 'tasks' %}">&#8592; Back</a>
+  </div>
+{% endblock %}
